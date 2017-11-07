@@ -51,6 +51,18 @@ def document(document, section):
     return (document, section)
 
 
+def check_digits(string):
+    # for ch in string:
+    #     if ch.isdigit():
+    #         print(ch)
+    var = string.split()
+    # pprint.pprint(var)
+    # pprint.pprint(" ")
+    # pprint.pprint(var[2:10])
+    teste = var[2:10]
+    pprint.pprint(teste)
+
+
 parser = ox.make_parser([
     ('document : document section', section_all),
     ('document : section', lambda x: x),
@@ -70,4 +82,16 @@ expr = data.return_data()
 tokens = lexer(expr)
 ast = parser(tokens)
 
-pprint.pprint(ast)
+teste = str(ast)
+print("-------------------------------------")
+# pprint.pprint(teste)
+print("=================================================================================================")
+# pprint.pprint(teste.split('subsection'))
+var = teste.split('SampleData')
+for l in var:
+    k = l.split('B')
+    # pprint.pprint(k)
+    for n in k:
+        check_digits(n)
+        pprint.pprint("....")
+    pprint.pprint("***************************************")
