@@ -21,7 +21,25 @@ tokens_list = ['SECTION_TITLE',
                'EQUAL']
 
 
-def lexer(source):
+def lexer(source: str):
+    """
+    Return a list of tokens from a source string.
+    
+    ...
+    
+    Args:
+        source (int):
+            A string with Arlequin code.
+            
+    Return:
+        ...
+    
+    See also:
+        ...
+        
+    Raises:
+        sdfsdfs
+    """
     return [tk for tk in raw_lexer(source) if tk.type != 'COMMENT']
 
 
