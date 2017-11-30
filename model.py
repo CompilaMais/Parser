@@ -6,6 +6,7 @@ class SubSection():
     title = None
     attribute = None
     comment = []
+    data = []
 
 
 class Section():
@@ -13,3 +14,7 @@ class Section():
     subSection = []
     comment = []
     attribute = None
+
+
+class DataModel():
+    value = []

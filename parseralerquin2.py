@@ -1,8 +1,6 @@
 import ox
 import pprint
 from data import Data
-from model import Section, SubSection, DataModel
-
 
 raw_lexer = ox.make_lexer([
     ('SECTION_TITLE', r'\[[^\]]+\]\n*'),
@@ -19,7 +17,8 @@ tokens_list = ['SECTION_TITLE',
                'COMMENT',
                'STRING',
                'EQUAL']
-
+# OrderedDict from collections -> Utilizar no dicionario
+# Header
 
 def lexer(source):
     return [tk for tk in raw_lexer(source) if tk.type != 'COMMENT']
@@ -53,24 +52,6 @@ def document(document, section):
     return (document, section)
 
 
-section_model = Section()
-subsection_model = SubSection()
-data_model = DataModel()
-
-
-def check_digits(string):
-    # for ch in string:
-    #     if ch.isdigit():
-    #         print(ch)
-    var = string.split()
-    # pprint.pprint(var)
-    # pprint.pprint(" ")
-    # pprint.pprint(var[2:10])
-    teste = var[2:10]
-    # pprint.pprint(teste)
-    data_model.value.append(teste)
-
-
 parser = ox.make_parser([
     ('document : document section', section_all),
     ('document : section', lambda x: x),
@@ -85,30 +66,10 @@ parser = ox.make_parser([
     ('attribute : STRING EQUAL STRING', attribute_data),
 ], tokens_list)
 
+
 data = Data()
 expr = data.return_data()
 tokens = lexer(expr)
 ast = parser(tokens)
 
-
-teste = str(ast)
-print("-------------------------------------")
-# pprint.pprint(teste)
-print("=================================================================================================")
-# pprint.pprint(teste.split('subsection'))
-var = teste.split('SampleData')
-for l in var:
-    k = l.split('B')
-    # pprint.pprint(k)
-    for n in k:
-        check_digits(n)
-    #     pprint.pprint("....")
-    # pprint.pprint("***************************************")
-
-
-for testando in data_model.value:
-    pprint.pprint(testando)
-    pprint.pprint("....")
-
-# pprint.pprint("================")
-# pprint.pprint(data_model.value)
+pprint.pprint(ast)
