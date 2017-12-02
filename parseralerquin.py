@@ -24,19 +24,19 @@ tokens_list = ['SECTION_TITLE',
 def lexer(source: str):
     """
     Return a list of tokens from a source string.
-    
+
     ...
-    
+
     Args:
         source (int):
             A string with Arlequin code.
-            
+
     Return:
         ...
-    
+
     See also:
         ...
-        
+
     Raises:
         sdfsdfs
     """
@@ -107,7 +107,7 @@ data = Data()
 expr = data.return_data()
 tokens = lexer(expr)
 ast = parser(tokens)
-
+pprint.pprint(ast)
 
 teste = str(ast)
 print("-------------------------------------")
