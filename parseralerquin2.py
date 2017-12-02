@@ -3,9 +3,6 @@ import pprint
 from data import Data
 import collections
 
-# This dictionary remembers the order in which its data are added
-dictionary = collections.OrderedDict()
-
 lexer = ox.make_lexer([
     ('SECTION_TITLE', r'\[[^\]]+\]\n*'),
     ('SUBSECTION_TITLE', r'\[\[[^\]]+\]\]\n*'),
@@ -27,7 +24,7 @@ def section(section, body):
 
 
 def section_all(section, subsection):
-    return ((section,) + subsection)
+    return (section, subsection)
 
 
 def subsection(subsection, body):
@@ -46,7 +43,7 @@ def document(document, section):
     return (document, section)
 
 
-dictionary = ox.make_parser([
+parser = ox.make_parser([
     ('document : document section', section_all),
     ('document : section', lambda x: x),
     ('section : section subsection', section_all),
@@ -60,27 +57,14 @@ dictionary = ox.make_parser([
 ], tokens_list)
 
 
-# def extract_section(ast):
-#     head, *tail = ast
-#     if head == 'section':
-#         print (tail[0])
-#     elif head == 'subsection':
-#         print (tail[0])
-#     elif head == 'attr':
-#         print (tail[0])
-#     else:
-#         print("==")
-#         if tail:
-#             x, *y = tail
-#             # print(y)
-#             extract_section(x)
-#             # extract_section(y)
-#
-
 data = Data()
 expr = data.return_data()
 tokens = lexer(expr)
-ast = dictionary(tokens)
-pprint.pprint(ast[0])
+ast = parser(tokens)
 
-pprint.pprint(ast[1])
+test = []
+
+for tupla in ast[0]:
+    y = tupla
+    for line in y:
+        test.append(line)
