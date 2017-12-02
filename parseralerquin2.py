@@ -68,4 +68,8 @@ for tupla in ast[0]:
     y = tupla
     for line in y:
         test.append(line)
-        print(line)
+        # print(line)
+
+for lista in test:
+    for final_list in lista:
+        print(final_list)
