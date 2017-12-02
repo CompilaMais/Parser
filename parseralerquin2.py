@@ -1,6 +1,6 @@
 import ox
 import pprint
-from data import Data
+from data import (Data, Document, Section, Subsection)
 
 lexer = ox.make_lexer([
     ('SECTION_TITLE', r'\[[^\]]+\]\n*'),
@@ -35,7 +35,7 @@ def attribute_data(string_attr, equal, string_variable):
 
 
 def body(attribute, body):
-    return ((attribute,) + body)
+    return ((attribute, ) + body)
 
 
 def section_body(body_section, subsection):
@@ -57,15 +57,40 @@ parser = ox.make_parser([
 ], tokens_list)
 
 
+def eval(ast, document, last_create=None):
+    head, *tail = ast
+
+    if head[0] == 'section':
+        section = Section(head[1].rstrip())
+        document.sections.append(section)
+        if tail:
+            eval(tail, document, 'section')
+    elif head[0] == 'subsection':
+        subsection = Subsection(head[1].rstrip())
+        document.sections[-1].subsections.append(subsection)
+        if tail:
+            eval(tail, document, 'subsection')
+    elif head[0] == 'attr':
+        attr = (head[1]+" = "+tail[0][1]).rstrip()
+        if last_create == 'section':
+            document.sections[-1].attrs.append(attr)
+        else:
+            document.sections[-1].subsections[-1].attrs.append(attr)
+    else:
+        eval(head, document, last_create)
+        if tail:
+            eval(tail, document, last_create)
+
+
+def get_variable(ast):
+    head, *tail = ast
+    return head[1]
+
+
 data = Data()
 expr = data.return_data()
 tokens = lexer(expr)
 ast = parser(tokens)
-
-test = []
-
-for tupla in ast[0]:
-    y = tupla
-    for line in y:
-        test.append(line)
-        print(line)
+document = Document()
+eval(ast, document)
+document.print_document()
