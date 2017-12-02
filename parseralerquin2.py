@@ -1,7 +1,6 @@
 import ox
 import pprint
 from data import Data
-import collections
 
 lexer = ox.make_lexer([
     ('SECTION_TITLE', r'\[[^\]]+\]\n*'),
@@ -32,23 +31,24 @@ def subsection(subsection, body):
 
 
 def attribute_data(string_attr, equal, string_variable):
-    return (((('attr', string_attr),) + (('variable', string_variable),)),)
+    return (('attr', string_attr), ('variable', string_variable))
 
 
 def body(attribute, body):
     return ((attribute,) + body)
 
 
-def document(document, section):
-    return (document, section)
+def section_body(body_section, subsection):
+    return (body_section, subsection)
 
 
 parser = ox.make_parser([
     ('document : document section', section_all),
     ('document : section', lambda x: x),
-    ('section : section subsection', section_all),
-    ('section : SECTION_TITLE subsection', section),
-    ('section : SECTION_TITLE body', section),
+    ('section : SECTION_TITLE body_section', section),
+    ('body_section : body_section subsection', section_body),
+    ('body_section : subsection', lambda x: x),
+    ('body_section : body', lambda x: x),
     ('subsection : SUBSECTION_TITLE body', subsection),
     ('body : attribute body', body),
     ('body : attribute', lambda x: x),
@@ -68,3 +68,4 @@ for tupla in ast[0]:
     y = tupla
     for line in y:
         test.append(line)
+        print(line)
