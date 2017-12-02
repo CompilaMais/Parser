@@ -1,6 +1,10 @@
 import ox
 import pprint
 from data import Data
+import collections
+
+# This dictionary remembers the order in which its data are added
+dictionary = collections.OrderedDict()
 
 lexer = ox.make_lexer([
     ('SECTION_TITLE', r'\[[^\]]+\]\n*'),
@@ -42,7 +46,7 @@ def document(document, section):
     return (document, section)
 
 
-parser = ox.make_parser([
+dictionary = ox.make_parser([
     ('document : document section', section_all),
     ('document : section', lambda x: x),
     ('section : section subsection', section_all),
@@ -59,6 +63,6 @@ parser = ox.make_parser([
 data = Data()
 expr = data.return_data()
 tokens = lexer(expr)
-ast = parser(tokens)
+ast = dictionary(tokens)
 
 pprint.pprint(ast)
