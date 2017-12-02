@@ -23,7 +23,7 @@ def section(section, body):
 
 
 def section_all(section, subsection):
-    return (section, subsection)
+    return ((section,) + subsection)
 
 
 def subsection(subsection, body):
@@ -56,9 +56,27 @@ parser = ox.make_parser([
 ], tokens_list)
 
 
+# def extract_section(ast):
+#     head, *tail = ast
+#     if head == 'section':
+#         print (tail[0])
+#     elif head == 'subsection':
+#         print (tail[0])
+#     elif head == 'attr':
+#         print (tail[0])
+#     else:
+#         print("==")
+#         if tail:
+#             x, *y = tail
+#             # print(y)
+#             extract_section(x)
+#             # extract_section(y)
+#
+
 data = Data()
 expr = data.return_data()
 tokens = lexer(expr)
 ast = parser(tokens)
+pprint.pprint(ast[0])
 
-pprint.pprint(ast)
+pprint.pprint(ast[1])
