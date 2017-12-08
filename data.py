@@ -1,6 +1,5 @@
-import os
-import re
-
+import pandas as pd
+import pprint
 
 class Data():
 
@@ -74,9 +73,11 @@ def extract_subsection_data(string):
     string_splited = string.split(" ")
     filter_string = []
 
+    number_of_new_lines = string.count('\n')
+
     # Here the null fields are removed from list.
     for field in string_splited:
-        if field != '':
+        if field != '' and field != '\n':
             filter_string.append(field)
 
     final_list = []
@@ -84,31 +85,33 @@ def extract_subsection_data(string):
     All the lists starts with '\n' character in start.So we start to manipulate
     then in position 1 of the list.
     '''
-    x = 1
-    while x < len(filter_string):
+
+    number_of_loci = int((len(filter_string)/(number_of_new_lines/2)) - 2)
+
+    x = 0
+    for count in range(int(number_of_new_lines/2)):
         varAux = []
-        varAux.append(filter_string[x])
-        varAux.append(filter_string[x+1])
-        varAux.append(filter_string[x+2])
-        varAux.append(filter_string[x+3])
-        varAux.append(filter_string[x+4])
-        varAux.append(filter_string[x+5])
-        varAux.append(filter_string[x+6])
-        varAux.append(filter_string[x+7])
-        varAux.append(filter_string[x+8])
-        varAux.append(filter_string[x+9])
 
-        final_list.append(varAux)
+        number = filter_string[x] + filter_string[x+1]
+        print(number_of_loci)
+        for count2 in range(int(number_of_loci/2)):
+            varAux.append('(' + filter_string[x+2].replace("\n", "") + ',' +
+                          filter_string[x+2+int(number_of_loci/2)].replace("\n", "") + ')')
+            x = x + 1
 
-        '''
-        In each subsection with have sub_data to be extracted in this format:
-          BT0BA1E1  17  184 116 258 280 184 116 258 280
-        So we scroll list in 10 positions each time, so this conditional makes it
-        happens in correct way.
-        '''
-        if(x+11 >= len(filter_string)):
-            break
-        else:
-            x = x + 10
+        x = x + 2 + int(number_of_loci/2)
+        final_list.append((number, varAux))
+
+    pprint.pprint(final_list)
+
+    columns = []
+
+    for count in range(1, int(number_of_loci/2) + 1):
+        column = 'loci_' + str(count)
+        columns.append(column)
+
+    print(columns)
+    a = pd.DataFrame.from_items(final_list, orient='index', columns=columns)
+    print(a)
 
     return final_list
