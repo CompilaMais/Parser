@@ -48,6 +48,7 @@ class Subsection:
     def __init__(self, name):
         self.name = name
         self.attrs = []
+        self.data_frames = []
 
     def print_subsection(self):
         print(self.name)
@@ -55,63 +56,55 @@ class Subsection:
             print(attr)
 
     def extract_subsection(self):
-        extract_lista = []
         for attr in self.attrs:
             if 'SampleData' in attr:
-                varAux = extract_subsection_data(attr['SampleData'])
-                extract_lista.append(varAux)
+                attr['SampleData'] = self.extract_subsection_data(attr['SampleData'])
 
-        print(extract_lista)
+    def extract_subsection_data(self, string):
+        '''
+        This function receives an subsection string with the data.
+        '''
 
+        # Here the spaces are removed from list.
+        string_splited = string.split(" ")
+        filter_string = []
 
-def extract_subsection_data(string):
-    '''
-    This function receives an subsection string with the data.
-    '''
+        number_of_new_lines = string.count('\n')
 
-    # Here the spaces are removed from list.
-    string_splited = string.split(" ")
-    filter_string = []
+        # Here the null fields are removed from list.
+        for field in string_splited:
+            if field != '' and field != '\n':
+                filter_string.append(field)
 
-    number_of_new_lines = string.count('\n')
+        final_list = []
+        '''
+        All the lists starts with '\n' character in start.So we start to manipulate
+        then in position 1 of the list.
+        '''
 
-    # Here the null fields are removed from list.
-    for field in string_splited:
-        if field != '' and field != '\n':
-            filter_string.append(field)
+        number_of_loci = int((len(filter_string)/(number_of_new_lines/2)) - 2)
 
-    final_list = []
-    '''
-    All the lists starts with '\n' character in start.So we start to manipulate
-    then in position 1 of the list.
-    '''
+        x = 0
+        for count in range(int(number_of_new_lines/2)):
+            varAux = []
 
-    number_of_loci = int((len(filter_string)/(number_of_new_lines/2)) - 2)
+            feature = filter_string[x]
+            varAux.append(filter_string[x+1])
+            for count2 in range(int(number_of_loci/2)):
+                varAux.append('(' + filter_string[x+2].replace("\n", "") + ',' +
+                              filter_string[x+2+int(number_of_loci/2)].replace("\n", "") + ')')
+                x = x + 1
 
-    x = 0
-    for count in range(int(number_of_new_lines/2)):
-        varAux = []
+            x = x + 2 + int(number_of_loci/2)
+            final_list.append((feature, varAux))
 
-        number = filter_string[x] + filter_string[x+1]
-        print(number_of_loci)
-        for count2 in range(int(number_of_loci/2)):
-            varAux.append('(' + filter_string[x+2].replace("\n", "") + ',' +
-                          filter_string[x+2+int(number_of_loci/2)].replace("\n", "") + ')')
-            x = x + 1
+        columns = ['number']
 
-        x = x + 2 + int(number_of_loci/2)
-        final_list.append((number, varAux))
+        for count in range(1, int(number_of_loci/2) + 1):
+            column = 'loci_' + str(count)
+            columns.append(column)
 
-    pprint.pprint(final_list)
+        data_frame = pd.DataFrame.from_items(final_list, orient='index', columns=columns)
+        self.data_frames.append(data_frame)
 
-    columns = []
-
-    for count in range(1, int(number_of_loci/2) + 1):
-        column = 'loci_' + str(count)
-        columns.append(column)
-
-    print(columns)
-    a = pd.DataFrame.from_items(final_list, orient='index', columns=columns)
-    print(a)
-
-    return final_list
+        return data_frame
