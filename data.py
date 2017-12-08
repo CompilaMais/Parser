@@ -1,6 +1,7 @@
 import os
 import re
 
+
 class Data():
 
     def return_data(self):
@@ -20,6 +21,10 @@ class Document:
         for section in self.sections:
             section.print_section()
 
+    def extract_document(self):
+        for section in self.sections:
+            section.extract_section()
+
 
 class Section:
     def __init__(self, name):
@@ -28,12 +33,16 @@ class Section:
         self.attrs = []
 
     def print_section(self):
-        # print(self.name)
-        # for attr in self.attrs:
-        #     print(attr)
+        print(self.name)
+        for attr in self.attrs:
+            print(attr)
 
         for subsection in self.subsections:
             subsection.print_subsection()
+
+    def extract_section(self):
+        for subsection in self.subsections:
+            subsection.extract_subsection()
 
 
 class Subsection:
@@ -42,62 +51,64 @@ class Subsection:
         self.attrs = []
 
     def print_subsection(self):
-        # print(self.name)
-        # for attr in self.attrs:
-        #     print(attr)
+        print(self.name)
+        for attr in self.attrs:
+            print(attr)
 
-        self.extract_attr()
-
-    def extract_attr(self):
-        x = []
+    def extract_subsection(self):
+        extract_lista = []
         for attr in self.attrs:
             if 'SampleData' in attr:
-                funcao(attr['SampleData'])
-                print("==============")
-        #         x.append(attr['SampleData'])
-        #
-        # for y in x:
-        #     print("=========")
-        #     print(x)
-        #     print("=========")
+                varAux = extract_subsection_data(attr['SampleData'])
+                extract_lista.append(varAux)
+
+        print(extract_lista)
 
 
-def funcao(string):
-    teste = string.split(" ")
-    lista = []
+def extract_subsection_data(string):
+    '''
+    This function receives an subsection string with the data.
+    '''
 
-    print(teste)
-    for letter in teste:
-        if letter != '':
-            lista.append(letter)
+    # Here the spaces are removed from list.
+    string_splited = string.split(" ")
+    filter_string = []
 
-    lista_final = []
-    print(lista)
+    # Here the null fields are removed from list.
+    for field in string_splited:
+        if field != '':
+            filter_string.append(field)
 
-    print("Tamanho lista: %s",len(lista))
+    final_list = []
+    '''
+    All the lists starts with '\n' character in start.So we start to manipulate
+    then in position 1 of the list.
+    '''
     x = 1
-    while x < len(lista):
-        var = []
-        var.append(lista[x])
-        var.append(lista[x+1])
-        var.append(lista[x+2])
-        var.append(lista[x+3])
-        var.append(lista[x+4])
-        var.append(lista[x+5])
-        var.append(lista[x+6])
-        var.append(lista[x+7])
-        var.append(lista[x+8])
-        var.append(lista[x+9])
+    while x < len(filter_string):
+        varAux = []
+        varAux.append(filter_string[x])
+        varAux.append(filter_string[x+1])
+        varAux.append(filter_string[x+2])
+        varAux.append(filter_string[x+3])
+        varAux.append(filter_string[x+4])
+        varAux.append(filter_string[x+5])
+        varAux.append(filter_string[x+6])
+        varAux.append(filter_string[x+7])
+        varAux.append(filter_string[x+8])
+        varAux.append(filter_string[x+9])
 
-        lista_final.append(var)
+        final_list.append(varAux)
 
-        print("==========")
-        print(var)
-        print("==========")
-
-        if(x+11 >= len(lista)):
+        '''
+        In each subsection with have sub_data to be extracted in this format:
+          BT0BA1E1  17  184 116 258 280 184 116 258 280
+        So we scroll list in 10 positions each time, so this conditional makes it
+        happens in correct way.
+        '''
+        if(x+11 >= len(filter_string)):
             break
         else:
             x = x + 10
 
-    print(lista_final)
+    return final_list

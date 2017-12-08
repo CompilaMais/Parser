@@ -73,6 +73,7 @@ def eval(ast, document, last_create=None):
     elif head[0] == 'attr':
         value = tail[0][1].replace('{', "")
         value = value.replace('}', "")
+        value = value.replace('\t', "")
         attr = ({head[1]: (value).rstrip()})
         if last_create == 'section':
             document.sections[-1].attrs.append(attr)
@@ -95,4 +96,4 @@ tokens = lexer(expr)
 ast = parser(tokens)
 document = Document()
 eval(ast, document)
-document.print_document()
+document.extract_document()
