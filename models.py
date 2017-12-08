@@ -95,5 +95,6 @@ class Subsection:
 
         data_frame = pd.DataFrame.from_items(final_list, orient='index', columns=columns)
         self.data_frames.append(data_frame)
+        data_frame.to_csv('DataFrame_out.csv', sep='\t', index=False)
 
         return data_frame
