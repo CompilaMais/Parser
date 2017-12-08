@@ -71,7 +71,9 @@ def eval(ast, document, last_create=None):
         if tail:
             eval(tail, document, 'subsection')
     elif head[0] == 'attr':
-        attr = (head[1]+" = "+tail[0][1]).rstrip()
+        value = tail[0][1].replace('{', "")
+        value = value.replace('}', "")
+        attr = ({head[1]: (value).rstrip()})
         if last_create == 'section':
             document.sections[-1].attrs.append(attr)
         else:

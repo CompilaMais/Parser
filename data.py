@@ -1,3 +1,6 @@
+import os
+import re
+
 class Data():
 
     def return_data(self):
@@ -42,3 +45,10 @@ class Subsection:
         print(self.name)
         for attr in self.attrs:
             print(attr)
+
+        self.extract_attr()
+
+    def extract_attr(self):
+        for attr in self.attrs:
+            if 'SampleData' in attr:
+                print(attr['SampleData'])
