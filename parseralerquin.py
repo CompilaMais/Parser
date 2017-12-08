@@ -1,50 +1,30 @@
+from sys import argv
 import ox
-import pprint
-from data import Data
-from model import Section, SubSection, DataModel
+from models import (Document, Section, Subsection)
 
 
-raw_lexer = ox.make_lexer([
-    ('SECTION_TITLE', r'\[[^\]]+\]\n*'),
-    ('SUBSECTION_TITLE', r'\[\[[^\]]+\]\]\n*'),
-    ('DATA', r'\{[^\}]+\}\n*'),
-    ('COMMENT', r'\#[^\n]+\n*'),
-    ('STRING', r'[^=^#^\n^\[^\]^\}^\{]+\n*'),
-    ('EQUAL', r'='),
-])
-
-tokens_list = ['SECTION_TITLE',
-               'SUBSECTION_TITLE',
-               'DATA',
-               'COMMENT',
-               'STRING',
-               'EQUAL']
+file_name, file_in = argv
 
 
-def lexer(source: str):
-    """
-    Return a list of tokens from a source string.
-
-    ...
-
-    Args:
-        source (int):
-            A string with Arlequin code.
-
-    Return:
-        ...
-
-    See also:
-        ...
-
-    Raises:
-        sdfsdfs
-    """
-    return [tk for tk in raw_lexer(source) if tk.type != 'COMMENT']
+def create_lexer():
+    lexer = ox.make_lexer([
+        ('SECTION_TITLE', r'\[[^\]]+\]\n*'),
+        ('SUBSECTION_TITLE', r'\[\[[^\]]+\]\]\n*'),
+        ('DATA', r'\{[^\}]+\}\n*'),
+        ('ignore_COMMENT', r'\#[^\n]+\n*'),
+        ('STRING', r'[^=^#^\n^\[^\]^\}^\{]+\n*'),
+        ('EQUAL', r'='),
+    ])
+    return lexer
 
 
-def comment(comment):
-    return ('comment', comment)
+def create_tokens():
+    tokens_list = ['SECTION_TITLE',
+                   'SUBSECTION_TITLE',
+                   'DATA',
+                   'STRING',
+                   'EQUAL']
+    return tokens_list
 
 
 def section(section, body):
@@ -56,77 +36,87 @@ def section_all(section, subsection):
 
 
 def subsection(subsection, body):
-    return (('subsection', subsection), body)
+    return ((('subsection', subsection),) + body)
 
 
 def attribute_data(string_attr, equal, string_variable):
-    return (('attr', string_attr), equal, ('variable', string_variable))
+    return (('attr', string_attr), ('variable', string_variable))
 
 
-def body(body, attribute):
-    return (body, attribute)
+def body(attribute, body):
+    return ((attribute, ) + body)
 
 
-def document(document, section):
-    return (document, section)
+def section_body(body_section, subsection):
+    return (body_section, subsection)
 
 
-section_model = Section()
-subsection_model = SubSection()
-data_model = DataModel()
-
-
-def check_digits(string):
-    # for ch in string:
-    #     if ch.isdigit():
-    #         print(ch)
-    var = string.split()
-    # pprint.pprint(var)
-    # pprint.pprint(" ")
-    # pprint.pprint(var[2:10])
-    teste = var[2:10]
-    # pprint.pprint(teste)
-    data_model.value.append(teste)
-
+#  Defining tokens that will be used in the parser
+tokens_list = create_tokens()
 
 parser = ox.make_parser([
     ('document : document section', section_all),
     ('document : section', lambda x: x),
-    ('section : section subsection', section_all),
-    ('section : SECTION_TITLE subsection', section),
-    ('section : SECTION_TITLE body', section),
+    ('section : SECTION_TITLE body_section', section),
+    ('body_section : body_section subsection', section_body),
+    ('body_section : subsection', lambda x: x),
+    ('body_section : body', lambda x: x),
     ('subsection : SUBSECTION_TITLE body', subsection),
-    ('body : body attribute', body),
+    ('body : attribute body', body),
     ('body : attribute', lambda x: x),
-    ('attribute : COMMENT', comment),
     ('attribute : STRING EQUAL DATA', attribute_data),
     ('attribute : STRING EQUAL STRING', attribute_data),
 ], tokens_list)
 
-data = Data()
-expr = data.return_data()
-tokens = lexer(expr)
+
+def eval(ast, document, last_create=None):
+    head, *tail = ast
+
+    if head[0] == 'section':
+        section = Section(head[1].rstrip())
+        document.sections.append(section)
+        if tail:
+            eval(tail, document, 'section')
+    elif head[0] == 'subsection':
+        subsection = Subsection(head[1].rstrip())
+        document.sections[-1].subsections.append(subsection)
+        if tail:
+            eval(tail, document, 'subsection')
+    elif head[0] == 'attr':
+        value = tail[0][1].replace('{', "")
+        value = value.replace('}', "")
+        value = value.replace('\t', "")
+        attr = ({head[1]: (value).rstrip()})
+        if last_create == 'section':
+            document.sections[-1].attrs.append(attr)
+        else:
+            document.sections[-1].subsections[-1].attrs.append(attr)
+    else:
+        eval(head, document, last_create)
+        if tail:
+            eval(tail, document, last_create)
+
+
+def get_variable(ast):
+    head, *tail = ast
+    return head[1]
+
+
+def open_file(file_in: str):
+    file_data = open(file_in, 'r')
+    data = file_data.read()
+    file_data.close()
+    return data
+
+
+#  Open file user input in comand line
+data = open_file(file_in)
+
+#  Defining lexer ast
+lexer = create_lexer()
+tokens = lexer(data)
 ast = parser(tokens)
-pprint.pprint(ast)
-
-teste = str(ast)
-print("-------------------------------------")
-# pprint.pprint(teste)
-print("=================================================================================================")
-# pprint.pprint(teste.split('subsection'))
-var = teste.split('SampleData')
-for l in var:
-    k = l.split('B')
-    # pprint.pprint(k)
-    for n in k:
-        check_digits(n)
-    #     pprint.pprint("....")
-    # pprint.pprint("***************************************")
-
-
-for testando in data_model.value:
-    pprint.pprint(testando)
-    pprint.pprint("....")
-
-# pprint.pprint("================")
-# pprint.pprint(data_model.value)
+document = Document()
+eval(ast, document)
+document.extract_document()
+document.print_document()
