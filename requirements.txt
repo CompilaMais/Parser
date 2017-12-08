@@ -1,0 +1,7 @@
+chardet==3.0.4
+feedparser==5.2.1
+ox==2.3.804
+ox-parser==0.1.1
+pandas==0.21.0
+pytz==2017.3
+sidekick==0.1.1
